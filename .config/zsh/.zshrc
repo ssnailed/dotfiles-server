@@ -9,10 +9,8 @@ setopt HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_VERIFY BANG_HIST interactive
 HISTSIZE=10000000
 SAVEHIST=10000000
 
-# Load aliases and shortcuts if existent.
-[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/shortcutrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/shortcutrc"
+# Load aliases if existent.
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc"
-[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/zshnameddirrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/zshnameddirrc"
 
 # Basic auto/tab complete:
 autoload -U compinit
@@ -107,9 +105,6 @@ bindkey '^[[1;5C' forward-word
 bindkey '^[[1;5D' backward-word 
 
 
-
-PLUGINS_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins"
-[ -f "$PLUGINS_HOME/fzf/key-bindings.zsh" ]                                         && source "$PLUGINS_HOME/fzf/key-bindings.zsh"
-[ -f "$PLUGINS_HOME/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh" ] && source "$PLUGINS_HOME/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh"
-[ -f "$PLUGINS_HOME/autopyenv/autopyenv.plugin.zsh" ]                               && source "$PLUGINS_HOME/autopyenv/autopyenv.plugin.zsh"
+[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/fzf/key-bindings.zsh" ]                       && source "${XDG_DATA_HOME:-$HOME/.local/share}/fzf/key-bindings.zsh"
+[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/autopyenv/autopyenv.plugin.zsh" ] && source "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/autopyenv/autopyenv.plugin.zsh/autopyenv/autopyenv.plugin.zsh"
 
