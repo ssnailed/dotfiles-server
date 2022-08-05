@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+image() {
+    file=$1
+    w=$2
+    h=$3
+    x=$4
+    y=$5
+    kitty +icat --silent --transfer-mode file --place "${w}x${h}@${x}x${y}" "$file"
+    exit 1
+}
+
+video() {
+    file=$1
+    w=$2
+    h=$3
+    x=$4
+    y=$5
+    thumb="$(vidthumb "$file")"
+    if [ "$thumb" != "" ]; then
+      kitty +icat --silent --transfer-mode file --place "${w}x${h}@${x}x${y}" "$thumb" 
+      exit 1
+    fi
+    mediainfo "$file"
+    exit 1
+}
+
+batorcat() {
+	file="$1"
+	shift
+	if command -v bat > /dev/null 2>&1; then
+		bat --color=always --style=plain --pager=never "$file" "$@"
+  elif command -v batcat > /dev/null 2>&1; then 
+		batcat --color=always --style=plain --pager=never "$file" "$@"
+	else
+		cat "$file"
+	fi
+}
+
+CACHE="$HOME/.cache/lf/thumbnail.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | awk '{print $1}'))"
+
+case "$(printf "%s\n" "$(readlink -f "$1")" | awk '{print tolower($0)}')" in
+  *.md) glow "$1"  && exit 0 ;;
+  *.xml|*.html) w3m -dump "$1" && exit 0 ;;
+	*.[1-8]) man "$1" | col -b && exit 0 ;;
+	*.o) nm "$1" && exit 0 ;;
+esac
+
+case "$(file -bL --mime-type $1)" in
+  application/gzip) tar tzf "$1" ;;
+  application/x-bzip2) tar tjf "$1" ;;
+  application/x-xz) xz --list "$1" ;;
+  application/x-tar) tar tf "$1" ;;
+  application/zip) unzip -l "$1" ;;
+  application/java-archive) unzip -l "$1" ;;
+  application/x-rar) unrar l "$1" ;;
+  application/x-7z-compressed) 7z l "$1" ;;
+  application/x-iso9660-image) iso-info --no-header -l "$1" ;;
+  application/x-bittorrent) transmission-show "$1" ;;
+  application/vnd.sun.xml.writer) odt2txt "$1" ;;
+  application/msword) catdoc "$1" ;;
+  application/vnd.openxmlformats-officedocument.wordprocessingml.document) docx2txt < "$1" ;;
+  application/vnd.ms-excel) ssconvert --export-type=Gnumeric_stf:stf_csv "$1" "fd://1" | batorcat --language=csv  ;;
+  application/vnd.openxmlformats-officedocument.spreadsheetml.sheet) ssconvert --export-type=Gnumeric_stf:stf_csv "$1" "fd://1" | batorcat --language=csv ;;
+  application/epub+zip) [ ! -f "$CACHE" ] && epub-thumbnailer "$1" "$CACHE" 1024; image "$CACHE" "$2" "$3" "$4" "$5" ;;
+  application/pgp-encrypted) gpg -d -- "$1" ;;
+  image/*) image "$1" "$2" "$3" "$4" "$5" ;;
+  video/*) video "$1" "$2" "$3" "$4" "$5" ;;
+  *opendocument*) odt2txt "$1" ;;
+  text/*|*/xml|application/json) batorcat "$1" ;;
+  */pdf) [ ! -f "${CACHE}.jpg" ] && pdftoppm -jpeg -f 1 -singlefile "$1" "$CACHE"; image "${CACHE}.jpg" "$2" "$3" "$4" "$5" ;;
+  *) mediainfo "$1" || exit 1 ;;
+esac
+exit 0
