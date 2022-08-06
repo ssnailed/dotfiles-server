@@ -105,6 +105,6 @@ bindkey '^[[1;5C' forward-word
 bindkey '^[[1;5D' backward-word 
 
 
-[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/fzf/key-bindings.zsh" ]                       && source "${XDG_DATA_HOME:-$HOME/.local/share}/fzf/key-bindings.zsh"
-[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/autopyenv/autopyenv.plugin.zsh" ] && source "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/autopyenv/autopyenv.plugin.zsh/autopyenv/autopyenv.plugin.zsh"
+[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/fzf/key-bindings.zsh" ] && source "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/fzf/key-bindings.zsh"
+[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/autopyenv/autopyenv.plugin.zsh" ] && source "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/autopyenv/autopyenv.plugin.zsh"
 
