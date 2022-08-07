@@ -1,5 +1,9 @@
 #!/bin/sh
 
+for command in apt su pkill ; do
+	alias $command="sudo $command"
+done; unset command
+
 # Verbosity and settings that you pretty much just always are going to want.
 alias \
 	cp="cp -iv" \
