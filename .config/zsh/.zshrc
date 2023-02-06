@@ -1,5 +1,8 @@
-# Enable colors and change prompt:
-autoload -U colors && colors	# Load colors
+autoload -U colors && colors
+autoload edit-command-line && zle -N edit-command-line
+autoload -U add-zsh-hook
+autoload -U compinit
+autoload -Uz edit-command-line
 PS1="%B%F{blue}%n%F{cyan}@%F{blue}%m %F{magenta}[%f%3~%F{magenta}] %(?.%F{green}.%F{red})»%f%b "
 RPS1="%(?..%F{red}%?)"
 stty stop undef		# Disable ctrl-s to freeze terminal.
@@ -8,19 +11,20 @@ setopt HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_VERIFY BANG_HIST interactive
 # History in cache directory:
 HISTSIZE=10000000
 SAVEHIST=10000000
+HISTFILE="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/history"
 
-# Load aliases if existent.
+# Load aliases and shortcuts if existent.
+[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/shortcutrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/shortcutrc"
 [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliasrc"
+[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/shell/zshnameddirrc" ] && source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/zshnameddirrc"
 
 # Basic auto/tab complete:
-autoload -U compinit
 zstyle ':completion:*' menu select
 zmodload zsh/complist
 compinit
 _comp_options+=(globdots)		# Include hidden files.
 
 # vi mode
-autoload -Uz edit-command-line
 zle -N edit-command-line
 bindkey -M vicmd v edit-command-line
 bindkey -v
@@ -80,17 +84,12 @@ bindkey '^o' _lfcd
 
 # bind lazygit to ctrl-g
 lg () {
-  lazygit
-  tput cuu1;tput el
+  [ ! -d "$(pwd)/.git" ] && [[ $(read -ek "?Not in a git repository. Create a new git repository? (y/n): ") =~ ^[Yy]$ ]] && git init
+  [ -d "$(pwd)/.git" ] && lazygit -p $(pwd)
+  zle reset-prompt
 }
-
-_lazygit () {
-  BUFFER="lg"
-  zle accept-line
-}
-
-zle -N _lazygit
-bindkey '^g' _lazygit
+zle -N lg{,}
+bindkey '^g' lg
 
 # Edit line in vim with ctrl-e:
 autoload edit-command-line; zle -N edit-command-line
@@ -104,7 +103,8 @@ bindkey '^[[F' end-of-line
 bindkey '^[[1;5C' forward-word
 bindkey '^[[1;5D' backward-word 
 
-
-[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/fzf/key-bindings.zsh" ] && source "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/fzf/key-bindings.zsh"
-[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/autopyenv/autopyenv.plugin.zsh" ] && source "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/autopyenv/autopyenv.plugin.zsh"
-
+# plugins
+PLUGINS_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins"
+[ -f "$PLUGINS_HOME/fzf/key-bindings.zsh" ]                                         && source "$PLUGINS_HOME/fzf/key-bindings.zsh"
+[ -f "$PLUGINS_HOME/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh" ] && source "$PLUGINS_HOME/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh"
+[ -f "$PLUGINS_HOME/autopyenv/autopyenv.plugin.zsh" ]                               && source "$PLUGINS_HOME/autopyenv/autopyenv.plugin.zsh"
